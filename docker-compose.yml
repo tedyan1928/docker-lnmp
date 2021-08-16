@@ -1,0 +1,55 @@
+version: '3.3'
+services:
+  nginx:
+    container_name: nginx
+    build: ./nginx
+    ports:
+      - "80:80"
+    volumes:
+      - "./project:/var/project"
+      - "./nginx/conf.d:/etc/nginx/conf.d"
+    restart: unless-stopped
+    tty: true
+    networks:
+      - lnmp-networks
+
+  php74:
+    container_name: php74
+    build: ./php74
+    restart: unless-stopped
+    volumes:
+      - "./project:/var/project"
+    networks:
+      - lnmp-networks
+    depends_on:
+      - mysql57
+
+  mysql57:
+    container_name: mysql57
+    build: ./mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: "root"
+      MYSQL_DATABASE: "twdd"
+      MYSQL_USER: "user"
+      MYSQL_PASSWORD: "password"
+    ports:
+      - "3306:3306"
+    volumes:
+      - "~/db/mysql57:/var/lib/mysql"
+      - "./mysql/my.cnf:/etc/mysql/my.cnf"
+    networks:
+      - lnmp-networks
+
+  redis:
+    container_name: redis
+    build: ./redis
+    restart: unless-stopped
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "6379:6379"
+    networks:
+      - lnmp-networks
+networks:
+  lnmp-networks:
